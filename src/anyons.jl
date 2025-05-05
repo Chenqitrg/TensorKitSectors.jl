@@ -292,3 +292,89 @@ function Base.isless(a::IsingAnyon, b::IsingAnyon)
     vals = SectorValues{IsingAnyon}()
     return isless(findindex(vals, a), findindex(vals, b))
 end
+
+
+
+"""
+The semion category is almost Rep(ℤ₂), except that the associator is a non-trivial and has a non-trivial braiding. 
+Moreover, it is, perhaps the simplest, non-trivial unitary modular tensor category with central charge 1.
+It has two simple objects, the trivial on: 0 and the semion: 1, which is a non-trivial anyon.
+The associator is non-trivial only when three fusion anyons are all semions: ω(1,1,1) = -1.
+The and braiding is non-trivial only when two fusion anyons are semions: R(1,1) = i.
+Moreover, the Frobenius-Schur indicator is -1 for the semion and +1 for the trivial anyon.
+"""
+struct Semion <: Sector
+    isone::Bool
+    function Semion(s::Integer)
+        s in (0, 1) || throw(ArgumentError("Unknown Semion $s."))
+        return new(s === 0)
+    end
+end
+
+Base.IteratorSize(::Type{SectorValues{Semion}}) = Base.HasLength()
+Base.length(::SectorValues{Semion}) = 2
+function Base.iterate(::SectorValues{Semion}, i=0)
+    return i == 0 ? (Semion(0), 1) : (i == 1 ? (Semion(1), 2) : nothing)
+end
+function Base.getindex(::SectorValues{Semion}, i::Int)
+    return 1 <= i <= 2 ? Semion(i - 1) : throw(BoundsError(values(Semion), i))
+end
+TensorKit.findindex(::SectorValues{Semion}, s::Semion) = 2 - s.isone
+
+Base.convert(::Type{Semion}, s::Int) = Semion(s)
+Base.one(::Type{Semion}) = Semion(0)
+Base.conj(s::Semion) = s
+frobeniusschur(s::Semion) = s==Semion(0) ? 1 : -1
+
+dim(a::Semion) = 1
+
+TensorKit.FusionStyle(::Type{Semion}) = UniqueFusion()
+TensorKit.BraidingStyle(::Type{Semion}) = NoBraiding()
+# TensorKit.BraidingStyle(::Type{Semion}) = Anyonic()
+Base.isreal(::Type{Semion}) = false
+
+TensorKitSectors.:⊗(a::Semion, b::Semion) = (Semion(mod(to_Z2(a) + to_Z2(b),2)),)
+
+
+Base.IteratorSize(::TensorKit.SectorValues{Semion}) = Base.HasLength()
+Base.IteratorEltype(::TensorKit.SectorValues{Semion}) = Base.HasEltype()
+Base.length(::TensorKit.SectorValues{Semion}) = 2
+function Base.iterate(::TensorKit.SectorValues{Semion}, i=0)
+    return i == 2 ? nothing : (Semion(i), i + 1)
+end
+
+
+function to_Z2(s::Semion)
+    return s.isone ? 0 : 1
+end
+function TensorKit.Nsymbol(a::Semion, b::Semion, c::Semion)
+    return mod(to_Z2(a) + to_Z2(b) + to_Z2(c),2) == 0 ? 1 : 0
+end
+
+function TensorKit.Fsymbol(a::Semion, b::Semion, c::Semion,
+                 d::Semion, e::Semion, f::Semion)
+    if a == b == c == d == Semion(1)
+        return Int(- Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
+    else
+        return Int(Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
+    end
+end
+
+function TensorKit.Rsymbol(a::Semion, b::Semion, c::Semion)
+    if isone(a) && isone(b)
+        return Complex(im* Nsymbol(a, b, c))
+    else
+        return Complex(Nsymbol(a, b, c))
+    end
+end
+
+function Base.show(io::IO, a::Semion)
+    s = isone(a) ? "0" : "1"
+    return get(io, :typeinfo, nothing) === Semion ?
+           print(io, s) : print(io, "Semion(", s, ")")
+end
+
+Base.hash(a::Semion, h::UInt) = hash(a.isone, h)
+Base.isless(a::Semion, b::Semion) = isless(!a.isone, !b.isone)
+
+

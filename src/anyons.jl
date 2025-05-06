@@ -296,11 +296,11 @@ end
 
 
 """
-The semion category is almost Rep(ℤ₂), except that the associator is a non-trivial and has a non-trivial braiding. 
-Moreover, it is, perhaps the simplest, non-trivial unitary modular tensor category with central charge 1.
-It has two simple objects, the trivial on: 0 and the semion: 1, which is a non-trivial anyon.
+The semion category is almost Rep(ℤ₂), except that its associator is non-trivial and has non-trivial braiding. 
+Moreover, it is, perhaps the simplest, non-trivial unitary modular tensor category. It has central charge c = 1.
+It has two simple objects, the trivial one, denoted by 0 and the semion, denoted by 1, which is a non-trivial anyon.
 The associator is non-trivial only when three fusion anyons are all semions: ω(1,1,1) = -1.
-The and braiding is non-trivial only when two fusion anyons are semions: R(1,1) = i.
+And the braiding is non-trivial only when two fusion anyons are semions: R(1,1) = i.
 Moreover, the Frobenius-Schur indicator is -1 for the semion and +1 for the trivial anyon.
 """
 struct Semion <: Sector

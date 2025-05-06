@@ -1,0 +1,108 @@
+# ===========================================
+# Abstract Group and Group Element Definitions
+# ===========================================
+
+include("../groups.jl")
+
+modulus(::Type{ℤ{N}}) where {N} = N
+modulus(::Type{D{N}}) where {N} = N
+
+struct GroupElement{G<:Group}
+    value::Any
+
+    function GroupElement{G}(values...) where {G<:Group}
+        if G <: ℤ
+            if length(values) != 1
+                throw(ArgumentError("Cyclic group element must have one value"))
+            end
+            x = values[1]
+            N = modulus(G)
+            new(Int(mod(x, N)))
+        elseif G <: D
+            if length(values) != 2
+                throw(ArgumentError("Dihedral group element must have two values"))
+            end
+            s, r = values
+            N = modulus(G)
+            new((mod(s, 2), mod(r, N)))
+        else
+            new{G}(values)
+        end
+    end
+end
+
+# ===========================================
+# Group Operations
+# =========================================== 
+
+function elements(::Type{ℤ{N}}) where {N}
+    return ntuple(i -> GroupElement{ℤ{N}}(i - 1), N)
+end
+
+# elements(ℤ{3})
+function elements(::Type{D{N}}) where {N}
+    rotations = ntuple(i -> GroupElement{D{N}}(0, i - 1), N)  # (e, r, r², ...)
+    reflections = ntuple(i -> GroupElement{D{N}}(1, i - 1), N)  # (s, sr, sr², ...)
+    return (rotations..., reflections...)  # Joining the two tuples
+end
+
+# elements(D{3})
+function elements(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    group_elements = map(elements, Gs.parameters)
+    cartesian_product = collect(Iterators.product(group_elements...))
+    return map(GroupElement{ProductGroup{Gs}},cartesian_product)
+end
+
+
+# GroupElement{ℤ{3}×ℤ{3}}(GroupElement{ℤ₃}(0), GroupElement{ℤ₃}(1))
+# elements(ℤ{3}×D{3})
+
+function identity_element(::Type{ℤ{N}}) where {N}
+    return GroupElement{ℤ{N}}(0)
+end
+function identity_element(::Type{D{N}}) where {N}
+    return GroupElement{D{N}}(0,0)
+end
+function identity_element(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    groups = Gs.parameters
+    return GroupElement{ProductGroup{Gs}}((identity_element(g) for g in groups), Gs)
+    return GroupElement((identity_element(g) for g in group.groups), group) 
+end
+
+
+function inverse(x::GroupElement{ℤ{N}}) where {N}
+    return GroupElement{ℤ{N}}(-x.value)
+end
+function inverse(x::GroupElement{D{N}}) where {N}
+    s, r = x.value
+    return GroupElement{D{N}}(-s, (-1)^(s + 1) * r)
+end
+function inverse(x::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    groups = Gs.parameters
+    inverse_elements = map(x -> inverse(x), x.value)
+    return GroupElement{ProductGroup{Gs}}(inverse_elements)
+end
+
+# inverse(GroupElement{ℤ₃}(1))
+# inverse(GroupElement{D₃}(1,2))
+# inverse(GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1)))
+
+function Base.:*(x::GroupElement{ℤ{N}}, y::GroupElement{ℤ{N}}) where {N}
+    return GroupElement{ℤ{N}}(mod(x.value + y.value, N))
+end
+function Base.:*(x::GroupElement{D{N}}, y::GroupElement{D{N}}) where {N}
+    s1, r1 = x.value
+    s2, r2 = y.value
+    return GroupElement{D{N}}(mod(s1 + s2, 2), mod((-1)^s2 * r1 + r2, N))
+end
+function Base.:*(x::GroupElement{ProductGroup{Gs}}, y::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    newelement = ()
+    for (x1, y1) in zip(x.value, y.value)
+        newelement = (newelement..., x1 * y1)
+    end
+    return GroupElement{ProductGroup{Gs}}(newelement...)
+end
+
+# GroupElement{ℤ₃}(2) * GroupElement{ℤ₃}(2) * GroupElement{ℤ₃}(1)
+# GroupElement{D₃}(1,2) * GroupElement{D₃}(1,1) * GroupElement{D₃}(0,1)
+# GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(1,2)) * GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1)) * GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1))

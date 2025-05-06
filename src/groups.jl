@@ -4,6 +4,7 @@ abstract type Group end
 abstract type AbelianGroup <: Group end
 
 abstract type ℤ{N} <: AbelianGroup end
+struct D{N} <: Group end
 abstract type U₁ <: AbelianGroup end
 abstract type SU{N} <: Group end
 abstract type CU₁ <: Group end
@@ -12,6 +13,8 @@ const ℤ₂ = ℤ{2}
 const ℤ₃ = ℤ{3}
 const ℤ₄ = ℤ{4}
 const SU₂ = SU{2}
+const D₃ = D{3}
+const D₄ = D{4}
 
 type_repr(::Type{ℤ₂}) = "ℤ₂"
 type_repr(::Type{ℤ₃}) = "ℤ₃"
@@ -66,3 +69,7 @@ function type_repr(G::Type{<:ProductGroup})
     end
     return s
 end
+
+
+
+

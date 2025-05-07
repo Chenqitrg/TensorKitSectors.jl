@@ -132,5 +132,5 @@ function Base.getindex(::Type{ProductGroup{Gs}}, i::Int) where {Gs<:GroupTuple}
     return GroupElement{ProductGroup{Gs}}(elementtuple...)
 end
 
-findindex(::Type{ℤ{N}}, g::GroupElement{ℤ{N}}) where {N} = g.value
-findindex(::Type{D{N}}, g::GroupElement{D{N}}) where {N} = g.value[1] * N + g.value[2]
+findindex(g::GroupElement{ℤ{N}}) where {N} = g.value
+findindex(g::GroupElement{D{N}}) where {N} = g.value[1] * N + g.value[2]

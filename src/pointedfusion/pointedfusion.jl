@@ -38,19 +38,10 @@ function Base.iterate(::SectorValues{Irr{𝒞}}, i::Int=0)  where {𝒞<:VecGω}
         return i == rank(𝒞) ? nothing : (Irr{𝒞}[i], i + 1)
     end
 end
-findindex(::SectorValues{Irr{𝒞}}, g::Irr{𝒞})  where {𝒞<:VecGω} = findindex(𝒞.parameters[1], g.value)
+findindex(::SectorValues{Irr{𝒞}}, g::Irr{𝒞})  where {𝒞<:VecGω} = findindex(g.value)
 
-f(a, b, c) = 1
-# FusionStyle(Irr{VecGω{ℤ{3}, f}})
 
-rank(VecGω{ℤ{3}×D{5}, f})
-
-ℤ{Inf}[-5]
-(ℤ{Inf}×ℤ{5})[-15]
-findindex(D{3}, GroupElement{D{3}}(0,0))
-# @show GroupElement{ℤ{3}}(0)
-# @show CohomologyGroup{3, ℤ{3}, ℤ{Inf}}
-# GroupElement{CohomologyGroup{3, ℤ{3}, ℤ{Inf}}}(f)
-# Irr{VecGω{ℤ{3}, ω}}(GroupElement{ℤ{3}}(1))
+# Base.hash(c::ZNIrrep{N}, h::UInt) where {N} = hash(c.n, h)
+Base.isless(c1::Irr{𝒞}, c2::Irr{𝒞}) where {𝒞<:VecGω} = isless(findindex(c1.value), findindex(c2.value))
 
 

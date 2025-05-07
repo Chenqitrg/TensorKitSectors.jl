@@ -47,8 +47,8 @@ using Base: tuple_type_head, tuple_type_tail
 
 using LinearAlgebra: tr
 using TensorOperations
-# using HalfIntegers
-# using WignerSymbols
+using HalfIntegers
+using WignerSymbols
 
 # includes
 # --------

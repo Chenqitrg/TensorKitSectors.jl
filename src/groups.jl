@@ -19,6 +19,7 @@ const D₄ = D{4}
 type_repr(::Type{ℤ₂}) = "ℤ₂"
 type_repr(::Type{ℤ₃}) = "ℤ₃"
 type_repr(::Type{ℤ₄}) = "ℤ₄"
+type_repr(::Type{ℤ{Inf}}) = "ℤ"
 type_repr(::Type{SU₂}) = "SU₂"
 type_repr(T::Type) = repr(T)
 
@@ -52,24 +53,17 @@ function ×(G1::Type{<:Group}, G2::Type{ProductGroup{T}}) where {T<:GroupTuple}
 end
 ×(G1::Type{<:Group}, G2::Type{<:Group}) = ProductGroup{Tuple{G1,G2}}
 
-function type_repr(G::Type{<:ProductGroup})
-    T = G.parameters[1]
-    groups = T.parameters
-    if length(groups) == 1
-        s = "ProductGroup{Tuple{" * type_repr(groups[1]) * "}}"
-    else
-        s = "("
-        for i in 1:length(groups)
-            if i != 1
-                s *= " × "
-            end
-            s *= type_repr(groups[i])
-        end
-        s *= ")"
-    end
-    return s
+
+order(::Type{ℤ{N}}) where {N} = N
+order(::Type{D{N}}) where {N} = 2*N
+function order(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    orders = map(order, Gs.parameters)
+    return prod(orders)
 end
 
+abstract type FusionCategory end
+abstract type VecGω{G,ω} <: FusionCategory end
+abstract type CohomologyGroup{N,G,A} <: AbelianGroup end
 
 
 

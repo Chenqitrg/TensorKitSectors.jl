@@ -2,35 +2,43 @@
 # Abstract Group and Group Element Definitions
 # ===========================================
 
-include("../groups.jl")
+# include("../groups.jl")
+# include("display.jl")
 
-modulus(::Type{ℤ{N}}) where {N} = N
-modulus(::Type{D{N}}) where {N} = N
+
 
 struct GroupElement{G<:Group}
     value::Any
 
-    function GroupElement{G}(values...) where {G<:Group}
-        if G <: ℤ
-            if length(values) != 1
-                throw(ArgumentError("Cyclic group element must have one value"))
-            end
-            x = values[1]
-            N = modulus(G)
-            new(Int(mod(x, N)))
-        elseif G <: D
-            if length(values) != 2
-                throw(ArgumentError("Dihedral group element must have two values"))
-            end
-            s, r = values
-            N = modulus(G)
-            new((mod(s, 2), mod(r, N)))
+    function GroupElement{G}(value) where {G<:ℤ}
+        N = G.parameters[1]
+        if N == Inf
+            new{G}(Int(value))
         else
-            new{G}(values)
+            new{G}(Int(mod(value, N)))
         end
+    end
+    function GroupElement{G}(values...) where {G<:D}
+        s, r = values
+        N = G.parameters[1]
+        new((mod(s, 2), mod(r, N)))
+    end
+    function GroupElement{ProductGroup{Gs}}(value...) where {Gs<:GroupTuple}
+        new{ProductGroup{Gs}}(value)
+    end
+    function GroupElement{G}(value) where {G<:CohomologyGroup}
+        new{G}(value)
     end
 end
 
+function GroupElement{ProductGroup{Gs}}(value) where {Gs<:GroupTuple}
+    return GroupElement{ProductGroup{Gs}}(value...)
+end
+
+
+   
+#    @show  GroupElement{ℤ{3}}(4)
+#    @show GroupElement{D{3}}(2,1)
 # ===========================================
 # Group Operations
 # =========================================== 
@@ -54,8 +62,8 @@ function elements(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
 end
 
 
-# GroupElement{ℤ{3}×ℤ{3}}(GroupElement{ℤ₃}(0), GroupElement{ℤ₃}(1))
-# elements(ℤ{3}×D{3})
+# @show GroupElement{ℤ{3}×ℤ{3}}(GroupElement{ℤ₃}(0), GroupElement{ℤ₃}(1))
+# display(elements(ℤ{3}×D{3}))
 
 function identity_element(::Type{ℤ{N}}) where {N}
     return GroupElement{ℤ{N}}(0)
@@ -66,7 +74,6 @@ end
 function identity_element(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     groups = Gs.parameters
     return GroupElement{ProductGroup{Gs}}((identity_element(g) for g in groups), Gs)
-    return GroupElement((identity_element(g) for g in group.groups), group) 
 end
 
 
@@ -103,6 +110,27 @@ function Base.:*(x::GroupElement{ProductGroup{Gs}}, y::GroupElement{ProductGroup
     return GroupElement{ProductGroup{Gs}}(newelement...)
 end
 
-# GroupElement{ℤ₃}(2) * GroupElement{ℤ₃}(2) * GroupElement{ℤ₃}(1)
+# @show GroupElement{ℤ₃}(2) * GroupElement{ℤ₃}(2) * GroupElement{ℤ₃}(1)
 # GroupElement{D₃}(1,2) * GroupElement{D₃}(1,1) * GroupElement{D₃}(0,1)
 # GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(1,2)) * GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1)) * GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1))
+
+Base.getindex(::Type{ℤ{N}}, i::Int) where {N} = GroupElement{ℤ{N}}(i)
+Base.getindex(::Type{D{N}}, i::Int) where {N} = GroupElement{D{N}}(i÷N, i%N)
+function Base.getindex(::Type{ProductGroup{Gs}}, i::Int) where {Gs<:GroupTuple}
+    groups = Gs.parameters
+    elementtuple = ()
+    for n in length(groups):-1:1
+        group_tail = groups[n]
+        order_tail = order(group_tail)
+        if n>1 && order_tail == Inf
+            throw(ArgumentError("The infinite group $group_tail must be the first one."))
+        end
+        ind_tail =  Int(i%order_tail)
+        i = i÷order_tail
+        elementtuple = (group_tail[ind_tail], elementtuple...)
+    end
+    return GroupElement{ProductGroup{Gs}}(elementtuple...)
+end
+
+findindex(::Type{ℤ{N}}, g::GroupElement{ℤ{N}}) where {N} = g.value
+findindex(::Type{D{N}}, g::GroupElement{D{N}}) where {N} = g.value[1] * N + g.value[2]

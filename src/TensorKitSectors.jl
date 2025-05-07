@@ -6,6 +6,11 @@ module TensorKitSectors
 
 # exports
 # -------
+export AbelianGroup
+export FusionCategory
+export GroupElement
+export VecGω
+export Irr
 export Sector, Group, AbstractIrrep
 export Irrep
 
@@ -24,13 +29,14 @@ export pentagon_equation, hexagon_equation
 export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
 export ProductSector
 export FermionParity, FermionNumber, FermionSpin
-export PlanarTrivial, FibonacciAnyon, IsingAnyon
+export PlanarTrivial, FibonacciAnyon, IsingAnyon, Semion
 
 # unicode exports
 # ---------------
 export ⊠, ⊗, ×
 export ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, CU₁
 export fℤ₂, fU₁, fSU₂
+
 
 # imports
 # -------
@@ -54,7 +60,9 @@ include("irreps.jl")    # irreps of symmetry groups, with bosonic braiding
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
-
+include("pointedfusion/groupelements.jl")
+include("pointedfusion/pointedfusion.jl")
+include("pointedfusion/display.jl")
 # precompile
 # ----------
 include("precompile.jl")

@@ -34,7 +34,7 @@ export PlanarTrivial, FibonacciAnyon, IsingAnyon, Semion
 # unicode exports
 # ---------------
 export ⊠, ⊗, ×
-export ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, CU₁
+export ℤ, D, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, CU₁
 export fℤ₂, fU₁, fSU₂
 
 
@@ -47,8 +47,8 @@ using Base: tuple_type_head, tuple_type_tail
 
 using LinearAlgebra: tr
 using TensorOperations
-using HalfIntegers
-using WignerSymbols
+# using HalfIntegers
+# using WignerSymbols
 
 # includes
 # --------

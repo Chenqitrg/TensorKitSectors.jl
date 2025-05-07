@@ -319,27 +319,27 @@ end
 function Base.getindex(::SectorValues{Semion}, i::Int)
     return 1 <= i <= 2 ? Semion(i - 1) : throw(BoundsError(values(Semion), i))
 end
-TensorKit.findindex(::SectorValues{Semion}, s::Semion) = 2 - s.isone
+findindex(::SectorValues{Semion}, s::Semion) = 2 - s.isone
 
 Base.convert(::Type{Semion}, s::Int) = Semion(s)
 Base.one(::Type{Semion}) = Semion(0)
 Base.conj(s::Semion) = s
-frobeniusschur(s::Semion) = s==Semion(0) ? 1 : -1
+# frobeniusschur(s::Semion) = s==Semion(0) ? 1 : -1
 
 dim(a::Semion) = 1
 
-TensorKit.FusionStyle(::Type{Semion}) = UniqueFusion()
-TensorKit.BraidingStyle(::Type{Semion}) = NoBraiding()
-# TensorKit.BraidingStyle(::Type{Semion}) = Anyonic()
+FusionStyle(::Type{Semion}) = UniqueFusion()
+# BraidingStyle(::Type{Semion}) = NoBraiding()
+BraidingStyle(::Type{Semion}) = Anyonic()
 Base.isreal(::Type{Semion}) = false
 
-TensorKitSectors.:⊗(a::Semion, b::Semion) = (Semion(mod(to_Z2(a) + to_Z2(b),2)),)
+⊗(a::Semion, b::Semion) = (Semion(mod(to_Z2(a) + to_Z2(b),2)),)
 
 
-Base.IteratorSize(::TensorKit.SectorValues{Semion}) = Base.HasLength()
-Base.IteratorEltype(::TensorKit.SectorValues{Semion}) = Base.HasEltype()
-Base.length(::TensorKit.SectorValues{Semion}) = 2
-function Base.iterate(::TensorKit.SectorValues{Semion}, i=0)
+Base.IteratorSize(::SectorValues{Semion}) = Base.HasLength()
+Base.IteratorEltype(::SectorValues{Semion}) = Base.HasEltype()
+Base.length(::SectorValues{Semion}) = 2
+function Base.iterate(::SectorValues{Semion}, i=0)
     return i == 2 ? nothing : (Semion(i), i + 1)
 end
 
@@ -347,11 +347,11 @@ end
 function to_Z2(s::Semion)
     return s.isone ? 0 : 1
 end
-function TensorKit.Nsymbol(a::Semion, b::Semion, c::Semion)
+function Nsymbol(a::Semion, b::Semion, c::Semion)
     return mod(to_Z2(a) + to_Z2(b) + to_Z2(c),2) == 0 ? 1 : 0
 end
 
-function TensorKit.Fsymbol(a::Semion, b::Semion, c::Semion,
+function Fsymbol(a::Semion, b::Semion, c::Semion,
                  d::Semion, e::Semion, f::Semion)
     if a == b == c == d == Semion(1)
         return Int(- Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
@@ -360,7 +360,7 @@ function TensorKit.Fsymbol(a::Semion, b::Semion, c::Semion,
     end
 end
 
-function TensorKit.Rsymbol(a::Semion, b::Semion, c::Semion)
+function Rsymbol(a::Semion, b::Semion, c::Semion)
     if isone(a) && isone(b)
         return Complex(im* Nsymbol(a, b, c))
     else

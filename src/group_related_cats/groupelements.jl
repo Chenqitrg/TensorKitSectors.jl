@@ -10,7 +10,7 @@
 struct GroupElement{G<:Group}
     value::Any
 
-    function GroupElement{G}(value) where {G<:ℤ}
+    function GroupElement{G}(value::Int) where {G<:ℤ}
         N = G.parameters[1]
         if N == Inf
             new{G}(Int(value))
@@ -18,12 +18,17 @@ struct GroupElement{G<:Group}
             new{G}(Int(mod(value, N)))
         end
     end
-    function GroupElement{G}(values...) where {G<:D}
+    function GroupElement{G}(values::Int...) where {G<:D}
         s, r = values
         N = G.parameters[1]
-        new((mod(s, 2), mod(r, N)))
+        new{G}((mod(s, 2), mod(r, N)))
     end
-    function GroupElement{ProductGroup{Gs}}(value...) where {Gs<:GroupTuple}
+    function GroupElement{ProductGroup{Gs}}(value::GroupElement...) where {Gs<:GroupTuple}
+        for (g, G) in zip(value, Gs.parameters)
+            if !(g isa GroupElement{G})
+                throw(ArgumentError("The element $g is not in group $G"))
+            end
+        end
         new{ProductGroup{Gs}}(value)
     end
     function GroupElement{G}(value) where {G<:CohomologyGroup}
@@ -31,7 +36,12 @@ struct GroupElement{G<:Group}
     end
 end
 
-function GroupElement{ProductGroup{Gs}}(value) where {Gs<:GroupTuple}
+function GroupElement{ProductGroup{Gs}}(value::Tuple{Vararg{GroupElement}}) where {Gs<:GroupTuple}
+    for (g, G) in zip(value, Gs.parameters)
+        if !(g isa GroupElement{G})
+            throw(ArgumentError("The element $g is not in group $G"))
+        end
+    end
     return GroupElement{ProductGroup{Gs}}(value...)
 end
 
@@ -134,3 +144,15 @@ end
 
 findindex(g::GroupElement{ℤ{N}}) where {N} = g.value
 findindex(g::GroupElement{D{N}}) where {N} = g.value[1] * N + g.value[2]
+function findindex(g::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    index = 0
+    groups = Gs.parameters
+    weight = 1
+    for i in length(groups):-1:1
+        g_this = g.value[i]
+        G_this = groups[i]
+        index += findindex(g_this) * weight
+        weight *= order(G_this)
+    end
+    return index
+end

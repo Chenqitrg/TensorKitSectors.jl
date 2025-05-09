@@ -82,3 +82,11 @@ end
 function Base.show(io::IO, x::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     print(io, "(", join(x.value, ", "), ")")
 end
+
+function Base.show(io::IO, x::Irr{VecGω{G,ω}}) where {G<:Group,ω}
+    print(io, x.value)  
+end
+
+function Base.show(io::IO, x::Irr{TY{A,χ,ϵ}}) where {A<:Group, χ,ϵ}
+    print(io, x.value)  
+end

@@ -1,15 +1,3 @@
-struct Irr{𝒞<:FusionCategory} <: Sector
-    value::Any
-    function Irr{𝒞}(value) where {𝒞<:VecGω}
-        G = 𝒞.parameters[1]
-        if value isa GroupElement{G}
-            new(value)
-        else
-            throw(ArgumentError("Irr value must be a GroupElement of type $G"))
-        end
-    end
-end
-
 rank(::Type{𝒞}) where {𝒞<:VecGω} = order(𝒞.parameters[1])
 
 FusionStyle(::Type{Irr{𝒞}}) where {𝒞<:VecGω}  = SimpleFusion()

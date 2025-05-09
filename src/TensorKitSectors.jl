@@ -8,7 +8,7 @@ module TensorKitSectors
 # -------
 export AbelianGroup
 export FusionCategory
-export GroupElement
+export GroupElement, elements
 export VecGω
 export Irr
 export Sector, Group, AbstractIrrep

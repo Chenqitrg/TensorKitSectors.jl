@@ -12,7 +12,7 @@ end
 
 rank(::Type{𝒞}) where {𝒞<:VecGω} = order(𝒞.parameters[1])
 
-FusionStyle(::Type{Irr{𝒞}}) where {𝒞<:VecGω}  = UniqueFusion()
+FusionStyle(::Type{Irr{𝒞}}) where {𝒞<:VecGω}  = SimpleFusion()
 BraidingStyle(::Type{Irr{𝒞}}) where {𝒞<:VecGω}  = NoBraiding()
 Nsymbol(a::Irr{𝒞}, b::Irr{𝒞}, c::Irr{𝒞}) where {𝒞<:VecGω} = (c.value == a.value * b.value)
 function Fsymbol(a::Irr{𝒞}, b::Irr{𝒞}, c::Irr{𝒞}, d::Irr{𝒞}, e::Irr{𝒞}, f::Irr{𝒞}) where {𝒞<:VecGω}

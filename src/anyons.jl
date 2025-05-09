@@ -296,11 +296,19 @@ end
 
 
 """
+struct Semion <: Sector
+    isone::Bool
+    function Semion(s::Integer)
+        s in (0, 1) || throw(ArgumentError("Unknown Semion $s."))
+        return new(s === 0)
+    end
+end
 The semion category is almost Rep(ℤ₂), except that its associator is non-trivial and has non-trivial braiding. 
+- The associator is non-trivial only when three fusion anyons are all semions: ω(1,1,1) = -1.
+- And the braiding is non-trivial only when two fusion anyons are semions: R(1,1) = i.
 Moreover, it is, perhaps the simplest, non-trivial unitary modular tensor category. It has central charge c = 1.
 It has two simple objects, the trivial one, denoted by 0 and the semion, denoted by 1, which is a non-trivial anyon.
-The associator is non-trivial only when three fusion anyons are all semions: ω(1,1,1) = -1.
-And the braiding is non-trivial only when two fusion anyons are semions: R(1,1) = i.
+
 Moreover, the Frobenius-Schur indicator is -1 for the semion and +1 for the trivial anyon.
 """
 struct Semion <: Sector
@@ -324,12 +332,11 @@ findindex(::SectorValues{Semion}, s::Semion) = 2 - s.isone
 Base.convert(::Type{Semion}, s::Int) = Semion(s)
 Base.one(::Type{Semion}) = Semion(0)
 Base.conj(s::Semion) = s
-# frobeniusschur(s::Semion) = s==Semion(0) ? 1 : -1
+frobeniusschur(s::Semion) = s==Semion(0) ? 1 : -1
 
 dim(a::Semion) = 1
 
-FusionStyle(::Type{Semion}) = UniqueFusion()
-# BraidingStyle(::Type{Semion}) = NoBraiding()
+FusionStyle(::Type{Semion}) = SimpleFusion()
 BraidingStyle(::Type{Semion}) = Anyonic()
 Base.isreal(::Type{Semion}) = false
 

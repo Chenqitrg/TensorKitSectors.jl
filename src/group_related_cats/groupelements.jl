@@ -58,7 +58,7 @@ end
 function elements(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     group_elements = map(elements, Gs.parameters)
     cartesian_product = collect(Iterators.product(group_elements...))
-    return map(GroupElement{ProductGroup{Gs}},cartesian_product)
+    return tuple(map(GroupElement{ProductGroup{Gs}},cartesian_product)...)
 end
 
 

@@ -299,7 +299,7 @@ end
 struct Semion <: Sector
     isone::Bool
     function Semion(s::Integer)
-        s in (0, 1) || throw(ArgumentError("Unknown Semion $s."))
+        s in (0, 1) || throw(ArgumentError("Unknown Semion s."))
         return new(s === 0)
     end
 end

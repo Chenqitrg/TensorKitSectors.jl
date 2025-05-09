@@ -72,3 +72,4 @@ end
 Base.iterate(::SectorValues{Irr{𝒞}}, i::Int=0)  where {𝒞<:TY} = i == rank(𝒞) ? nothing : (Irr{𝒞}[i], i + 1)
 
 findindex(::SectorValues{Irr{𝒞}}, a::Irr{𝒞})  where {𝒞<:TY} = Z2grading(a)==0 ? findindex(a.value) : rank(𝒞)
+Base.isless(c1::Irr{𝒞}, c2::Irr{𝒞}) where {𝒞<:TY} = isless(findindex(𝒞, c1), findindex(𝒞, c2))

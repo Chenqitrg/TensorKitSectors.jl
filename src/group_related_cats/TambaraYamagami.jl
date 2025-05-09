@@ -1,15 +1,3 @@
-
-abstract type TY{A, χ, ϵ} <: FusionCategory end # A: an Abelian group, χ: a symmetric non-degenerate bi-character, ϵ: the Frobenius-Schur indicator for the non-invertible object :σ
-
-function Irr{𝒞}(obj) where {𝒞<:TY}
-    A = 𝒞.parameters[1]
-    if isa(obj, GroupElement{A}) || obj == :σ
-        return Irr{𝒞}(obj)
-    else
-        throw(ArgumentError("Illegal object $obj"))
-    end
-end
-
 Z2grading(a::Irr{𝒞}) where {𝒞<:TY} = a == Irr{𝒞}(:σ) ? 1 : 0
 rank(::Type{𝒞}) where {𝒞<:TY} = order(𝒞.parameters[1]) + 1
 

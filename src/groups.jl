@@ -64,6 +64,26 @@ end
 abstract type FusionCategory end
 abstract type VecGω{G,ω} <: FusionCategory end
 abstract type CohomologyGroup{N,G,A} <: AbelianGroup end
+abstract type TY{A, χ, ϵ} <: FusionCategory end # A: an Abelian group, χ: a symmetric non-degenerate bi-character, ϵ: the Frobenius-Schur indicator for the non-invertible object :σ
 
+struct Irr{𝒞<:FusionCategory} <: Sector
+    value::Any
+    function Irr{𝒞}(value) where {𝒞<:VecGω}
+        G = 𝒞.parameters[1]
+        if value isa GroupElement{G}
+            new(value)
+        else
+            throw(ArgumentError("Irr value must be a GroupElement of type $G"))
+        end
+    end
+    function Irr{𝒞}(obj) where {𝒞<:TY}
+        A = 𝒞.parameters[1]
+        if isa(obj, GroupElement{A}) || obj == :σ
+            new{𝒞}(obj)
+        else
+            throw(ArgumentError("Illegal object $obj"))
+        end
+    end
+end
 
 

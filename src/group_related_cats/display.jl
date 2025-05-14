@@ -53,18 +53,18 @@ function superscript(n::Integer)
 end
 
 
-function Base.show(io::IO, x::GroupElement{ℤ{N}}) where {N}
-    if x.value == 0
+function Base.show(io::IO, x::ℤ{N}) where {N}
+    if x.a == 0
         print(io, "e")
-    elseif x.value == 1
+    elseif x.a == 1
         print(io, "a")
     else
         print(io, "a", superscript(x.value))
     end
 end
 
-function Base.show(io::IO, x::GroupElement{D{N}}) where {N}
-    s, r = x.value
+function Base.show(io::IO, x::D{N}) where {N}
+    s, r = x.s, x.r
     if s == 0 && r == 0
         print(io, "e")
     elseif s == 0 && r == 1
@@ -79,8 +79,8 @@ function Base.show(io::IO, x::GroupElement{D{N}}) where {N}
         print(io, "sr", superscript(r))
     end
 end
-function Base.show(io::IO, x::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
-    print(io, "(", join(x.value, ", "), ")")
+function Base.show(io::IO, x::ProductGroup{Gs}) where {Gs<:GroupTuple}
+    print(io, "(", join(x.components, ", "), ")")
 end
 
 function Base.show(io::IO, x::VecGωIrr{G,ω}) where {G<:Group,ω}

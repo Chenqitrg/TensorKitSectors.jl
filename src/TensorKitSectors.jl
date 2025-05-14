@@ -7,7 +7,7 @@ module TensorKitSectors
 # exports
 # -------
 export AbelianGroup
-export GroupElement, elements
+export elements
 export VecGωIrr, TYIrr
 export Sector, Group, AbstractIrrep
 export Irrep
@@ -58,7 +58,6 @@ include("irreps.jl")    # irreps of symmetry groups, with bosonic braiding
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
-include("group_related_cats/groupelements.jl")
 include("group_related_cats/TambaraYamagami.jl")
 include("group_related_cats/pointedfusion.jl")
 include("group_related_cats/display.jl")

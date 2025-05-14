@@ -4,7 +4,7 @@ struct TYIrr{A<:Group, χ, ϵ} <: Sector
         if !is_abelian(A)
             throw(ArgumentError("The group $A must be Abelian"))
         end
-        if isa(obj, GroupElement{A}) || obj == :σ
+        if isa(obj, A) || obj == :σ
             new{A,χ,ϵ}(obj)
         else
             throw(ArgumentError("Illegal object $obj"))

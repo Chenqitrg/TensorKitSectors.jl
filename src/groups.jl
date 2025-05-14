@@ -3,8 +3,27 @@
 abstract type Group end
 abstract type AbelianGroup <: Group end
 
-abstract type ℤ{N} <: AbelianGroup end
-struct D{N} <: Group end
+struct ℤ{N} <: AbelianGroup 
+    a::Int
+    function ℤ{N}(n::Int) where {N}
+        if N == Inf
+            throw("The group order $N must be finite")
+        end
+
+        new{N}(mod(n, N))
+    end
+end
+struct D{N} <: Group 
+    s::Int
+    r::Int
+    function D{N}(s::Int, r::Int) where {N}
+        if N == Inf
+            throw("The group order 2×$N must be finite")
+        end
+        new{N}(mod(s, 2), mod(r, N))
+    end
+end
+
 abstract type U₁ <: AbelianGroup end
 abstract type SU{N} <: Group end
 abstract type CU₁ <: Group end
@@ -19,13 +38,22 @@ const D₄ = D{4}
 type_repr(::Type{ℤ₂}) = "ℤ₂"
 type_repr(::Type{ℤ₃}) = "ℤ₃"
 type_repr(::Type{ℤ₄}) = "ℤ₄"
-type_repr(::Type{ℤ{Inf}}) = "ℤ"
 type_repr(::Type{SU₂}) = "SU₂"
 type_repr(T::Type) = repr(T)
 
 const GroupTuple = Tuple{Vararg{Group}}
 
-abstract type ProductGroup{T<:GroupTuple} <: Group end
+struct ProductGroup{T} <: Group 
+    components
+    function ProductGroup{T}(elements...) where {T<:GroupTuple}
+        for (g, G) in zip(elements, T.parameters)
+            if !(g isa G)
+                throw(ArgumentError("The element $g is not in group $G"))
+            end
+        end
+        new{T}(elements)
+    end
+end
 
 """
     ×(G::Vararg{Type{<:Group}}) -> ProductGroup{Tuple{G...}}
@@ -78,5 +106,138 @@ end
 is_abelian(::Type{G}) where {G<:Group} = _is_abelian(G)
 
 
+# ===========================================
+# Group Operations
+# =========================================== 
+
+function elements(::Type{ℤ{N}}) where {N}
+    return ntuple(i -> ℤ{N}(i - 1), N)
+end
+
+# elements(ℤ{3})
+function elements(::Type{D{N}}) where {N}
+    rotations = ntuple(i -> D{N}(0, i - 1), N)  # (e, r, r², ...)
+    reflections = ntuple(i -> D{N}(1, i - 1), N)  # (s, sr, sr², ...)
+    return (rotations..., reflections...)  # Joining the two tuples
+end
+
+# elements(D{3})
+function elements(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    group_elements = map(elements, Gs.parameters)
+    cartesian_product = collect(Iterators.product(group_elements...))
+    return tuple(map(x->ProductGroup{Gs}(x...),cartesian_product)...)
+end
 
 
+# @show GroupElement{ℤ{3}×ℤ{3}}(GroupElement{ℤ₃}(0), GroupElement{ℤ₃}(1))
+# display(elements(ℤ{3}×D{3}))
+
+identity_element(::Type{ℤ{N}}) where {N} = ℤ{N}(0)
+identity_element(::Type{D{N}}) where {N} = D{N}(0,0)
+function identity_element(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
+    groups = Gs.parameters
+    return ProductGroup{Gs}((identity_element(G) for G in groups)...)
+end
+
+function inverse(x::ℤ{N}) where {N}
+    return ℤ{N}(-x.a)
+end
+function inverse(x::D{N}) where {N}
+    return D{N}(-x.s, (-1)^(x.s + 1) * x.r)
+end
+function inverse(x::ProductGroup{Gs}) where {Gs<:GroupTuple}
+    groups = Gs.parameters[1].parameters
+    inverse_elements = map(p -> inverse(p), x.components)
+    return ProductGroup{Gs}(inverse_elements)
+end
+
+function Base.:*(x::ℤ{N}, y::ℤ{N}) where {N}
+    return ℤ{N}(mod(x.a + y.a, N))
+end
+function Base.:*(x::D{N}, y::D{N}) where {N}
+    s1, r1 = x.s, x.r
+    s2, r2 = y.s, y.r
+    return D{N}(mod(s1 + s2, 2), mod((-1)^s2 * r1 + r2, N))
+end
+function Base.:*(x::ProductGroup{Gs}, y::ProductGroup{Gs}) where {Gs<:GroupTuple}
+    newelement = ()
+    for (x1, y1) in zip(x.components, y.components)
+        newelement = (newelement..., x1 * y1)
+    end
+    return ProductGroup{Gs}(newelement...)
+end
+
+Base.getindex(::Type{ℤ{N}}, i::Int) where {N} = ℤ{N}(i-1) # Count from 1
+Base.getindex(::Type{D{N}}, i::Int) where {N} = D{N}((i-1)÷N, (i-1)%N) # Count from 1
+function Base.getindex(::Type{ProductGroup{Gs}}, i::Int) where {Gs<:GroupTuple}
+    i -= 1
+    groups = Gs.parameters
+    elementtuple = ()
+    for n in length(groups):-1:1
+        group_tail = groups[n]
+        order_tail = order(group_tail)
+        ind_tail =  i%order_tail
+        i = i÷order_tail
+        elementtuple = (group_tail[ind_tail+1], elementtuple...)
+    end
+    return ProductGroup{Gs}(elementtuple...)
+end
+
+findindex(g::ℤ{N}) where {N} = g.a + 1 # Count from 1
+findindex(g::D{N}) where {N} = g.s * N + g.r+1 # Count from 1
+function findindex(g::ProductGroup{Gs}) where {Gs<:GroupTuple}
+    index = 0
+    groups = Gs.parameters
+    weight = 1
+    for i in length(groups):-1:1
+        g_this = g.components[i]
+        G_this = groups[i]
+        index += (findindex(g_this)-1) * weight
+        weight *= order(G_this)
+    end
+    return index+1
+end
+
+# Examples
+
+# ℤ{3}(2)
+# ℤ{3}(3)
+# ℤ{3}(2) isa ℤ{3}
+# ℤ{3}(1) * ℤ{3}(2)
+
+# (ℤ₃×ℤ₃)(ℤ{3}(2), ℤ{3}(2))
+
+# D₃(0,1) * D₃(1,0)
+
+# inverse(D₃(0,1))
+
+# identity_element(D₃)
+
+# (ℤ₃×D₃)(ℤ₃(2), D₃(0,1))
+
+# (D₃×ℤ₃)(D₃(0,1), ℤ₃(2)) * (D₃×ℤ₃)(D₃(1,1), ℤ₃(1))
+
+# D₃[6]
+
+
+# (D₃×ℤ₃)[7]
+
+# findindex((D₃×ℤ₃)[7]) == 7
+
+# findindex((D₃×ℤ₃)[4]) == 4
+
+# order(ℤ₃)
+# order(D₃×ℤ₃)
+
+# G = ℤ₂×ℤ₂×ℤ₂
+# x = ℤ₂(0)
+# y = ℤ₂(1)
+# G(y,y,y) * G(y,x,y) 
+
+
+# elements(ℤ₃)
+# elements(D₄)
+# identity_element(ℤ₂×ℤ₂)
+# elements(ℤ₂×ℤ₂)
+
+# elements(D₃×ℤ₃)

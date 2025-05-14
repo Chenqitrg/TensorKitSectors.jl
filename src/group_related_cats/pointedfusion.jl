@@ -1,10 +1,10 @@
 struct VecGωIrr{G<:Group, ω} <: Sector
-    g::GroupElement{G}
+    g::G
     function VecGωIrr{G, ω}(g) where {G<:Group, ω}
-        if g isa GroupElement{G}
+        if g isa G
             new{G, ω}(g)
         else
-            throw(ArgumentError("Irr value must be a GroupElement of type $G"))
+            throw(ArgumentError("The Irr value $g must be a GroupElement of type $G"))
         end
     end
 end
@@ -30,9 +30,9 @@ Base.getindex(::SectorValues{VecGωIrr{G, ω}}, i::Int) where {G<:Group, ω} = V
 
 function Base.iterate(::SectorValues{VecGωIrr{G, ω}}, i::Int=0)  where {G<:Group, ω}
     if rank(VecGωIrr{G, ω})==Inf
-        return i <= 0 ? (VecGωIrr{G, ω}[i], (-i + 1)) : (VecGωIrr{G, ω}[i], -i)
+        return i <= 0 ? (VecGωIrr{G, ω}(G[i]), (-i + 1)) : (VecGωIrr{G, ω}(G[i]), -i)
     else
-        return i == rank(VecGωIrr{G, ω}) ? nothing : (VecGωIrr{G, ω}[i], i + 1)
+        return i == rank(VecGωIrr{G, ω})-1 ? nothing : (VecGωIrr{G, ω}(G[i+1]), i + 1)
     end
 end
 findindex(::SectorValues{VecGωIrr{G, ω}}, g::VecGωIrr{G, ω})  where {G<:Group, ω} = findindex(g.g)

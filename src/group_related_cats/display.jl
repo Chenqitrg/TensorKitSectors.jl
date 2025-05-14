@@ -12,10 +12,10 @@ function Base.show(io::IO, G::Type{<:ProductGroup})
     end
 end
 
-function Base.show(io::IO, G::Type{<:CohomologyGroup})
-    T = G.parameters
-    print(io, "H", superscript(T[1]), "(", T[2], " , ", T[3], ")")
-end
+# function Base.show(io::IO, G::Type{<:CohomologyGroup})
+#     T = G.parameters
+#     print(io, "H", superscript(T[1]), "(", T[2], " , ", T[3], ")")
+# end
 
 function subscript(n::Integer)
     subs = Dict('0' => '₀', '1' => '₁', '2' => '₂', '3' => '₃', '4' => '₄',
@@ -83,10 +83,10 @@ function Base.show(io::IO, x::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTu
     print(io, "(", join(x.value, ", "), ")")
 end
 
-function Base.show(io::IO, x::Irr{VecGω{G,ω}}) where {G<:Group,ω}
-    print(io, x.value)  
+function Base.show(io::IO, x::VecGωIrr{G,ω}) where {G<:Group,ω}
+    print(io, x.g)  
 end
 
-function Base.show(io::IO, x::Irr{TY{A,χ,ϵ}}) where {A<:Group, χ,ϵ}
+function Base.show(io::IO, x::TYIrr{A,χ,ϵ}) where {A<:Group, χ,ϵ}
     print(io, x.value)  
 end

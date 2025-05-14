@@ -61,29 +61,22 @@ function order(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     return prod(orders)
 end
 
-abstract type FusionCategory end
-abstract type VecGω{G,ω} <: FusionCategory end
-abstract type CohomologyGroup{N,G,A} <: AbelianGroup end
-abstract type TY{A, χ, ϵ} <: FusionCategory end # A: an Abelian group, χ: a symmetric non-degenerate bi-character, ϵ: the Frobenius-Schur indicator for the non-invertible object :σ
+# Default trait: assume any group is non-abelian.
+_is_abelian(::Type{G}) where {G<:Group} = false
 
-struct Irr{𝒞<:FusionCategory} <: Sector
-    value::Any
-    function Irr{𝒞}(value) where {𝒞<:VecGω}
-        G = 𝒞.parameters[1]
-        if value isa GroupElement{G}
-            new(value)
-        else
-            throw(ArgumentError("Irr value must be a GroupElement of type $G"))
-        end
-    end
-    function Irr{𝒞}(obj) where {𝒞<:TY}
-        A = 𝒞.parameters[1]
-        if isa(obj, GroupElement{A}) || obj == :σ
-            new{𝒞}(obj)
-        else
-            throw(ArgumentError("Illegal object $obj"))
-        end
-    end
+# Mark all subtypes of AbelianGroup as abelian.
+_is_abelian(::Type{G}) where {G<:AbelianGroup} = true
+
+# For a ProductGroup, check if all component groups are abelian.
+function _is_abelian(::Type{ProductGroup{T}}) where {T<:GroupTuple}
+    # T.parameters returns a tuple of the component types.
+    # We use `all` to verify each component is abelian.
+    all(g -> _is_abelian(g), T.parameters)
 end
+
+# Public function to test if a group type is abelian.
+is_abelian(::Type{G}) where {G<:Group} = _is_abelian(G)
+
+
 
 

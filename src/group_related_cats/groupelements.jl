@@ -31,9 +31,9 @@ struct GroupElement{G<:Group}
         end
         new{ProductGroup{Gs}}(value)
     end
-    function GroupElement{G}(value) where {G<:CohomologyGroup}
-        new{G}(value)
-    end
+    # function GroupElement{G}(value) where {G<:CohomologyGroup}
+    #     new{G}(value)
+    # end
 end
 
 function GroupElement{ProductGroup{Gs}}(value::Tuple{Vararg{GroupElement}}) where {Gs<:GroupTuple}
@@ -124,9 +124,10 @@ end
 # GroupElement{D₃}(1,2) * GroupElement{D₃}(1,1) * GroupElement{D₃}(0,1)
 # GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(1,2)) * GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1)) * GroupElement{ℤ₃×D₃}(GroupElement{ℤ₃}(1), GroupElement{D₃}(0,1))
 
-Base.getindex(::Type{ℤ{N}}, i::Int) where {N} = GroupElement{ℤ{N}}(i)
-Base.getindex(::Type{D{N}}, i::Int) where {N} = GroupElement{D{N}}(i÷N, i%N)
+Base.getindex(::Type{ℤ{N}}, i::Int) where {N} = GroupElement{ℤ{N}}(i-1)
+Base.getindex(::Type{D{N}}, i::Int) where {N} = GroupElement{D{N}}((i-1)÷N, (i-1)%N)
 function Base.getindex(::Type{ProductGroup{Gs}}, i::Int) where {Gs<:GroupTuple}
+    i -= 1
     groups = Gs.parameters
     elementtuple = ()
     for n in length(groups):-1:1
@@ -137,13 +138,13 @@ function Base.getindex(::Type{ProductGroup{Gs}}, i::Int) where {Gs<:GroupTuple}
         end
         ind_tail =  Int(i%order_tail)
         i = i÷order_tail
-        elementtuple = (group_tail[ind_tail], elementtuple...)
+        elementtuple = (group_tail[ind_tail+1], elementtuple...)
     end
     return GroupElement{ProductGroup{Gs}}(elementtuple...)
 end
 
-findindex(g::GroupElement{ℤ{N}}) where {N} = g.value
-findindex(g::GroupElement{D{N}}) where {N} = g.value[1] * N + g.value[2]
+findindex(g::GroupElement{ℤ{N}}) where {N} = g.value + 1
+findindex(g::GroupElement{D{N}}) where {N} = g.value[1] * N + g.value[2]+1
 function findindex(g::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     index = 0
     groups = Gs.parameters
@@ -151,8 +152,8 @@ function findindex(g::GroupElement{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     for i in length(groups):-1:1
         g_this = g.value[i]
         G_this = groups[i]
-        index += findindex(g_this) * weight
+        index += (findindex(g_this)-1) * weight
         weight *= order(G_this)
     end
-    return index
+    return index+1
 end

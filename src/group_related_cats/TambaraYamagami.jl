@@ -1,9 +1,23 @@
-Z2grading(a::Irr{𝒞}) where {𝒞<:TY} = a == Irr{𝒞}(:σ) ? 1 : 0
-rank(::Type{𝒞}) where {𝒞<:TY} = order(𝒞.parameters[1]) + 1
+struct TYIrr{A<:Group, χ, ϵ} <: Sector
+    value::Any
+    function TYIrr{A, χ, ϵ}(obj::Any) where{A<:Group, χ, ϵ}
+        if !is_abelian(A)
+            throw(ArgumentError("The group $A must be Abelian"))
+        end
+        if isa(obj, GroupElement{A}) || obj == :σ
+            new{A,χ,ϵ}(obj)
+        else
+            throw(ArgumentError("Illegal object $obj"))
+        end
+    end
+end
 
-FusionStyle(::Type{Irr{𝒞}}) where {𝒞<:TY}  = SimpleFusion()
-BraidingStyle(::Type{Irr{𝒞}}) where {𝒞<:TY}  = NoBraiding()
-function Nsymbol(a::Irr{𝒞}, b::Irr{𝒞}, c::Irr{𝒞}) where {𝒞<:TY}
+Z2grading(a::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ} = a == TYIrr{A,χ,ϵ}(:σ) ? 1 : 0
+rank(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ} = order(A) + 1
+
+FusionStyle(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = SimpleFusion()
+BraidingStyle(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = NoBraiding()
+function Nsymbol(a::TYIrr{A,χ,ϵ}, b::TYIrr{A,χ,ϵ}, c::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ}
     if Z2grading(a)==Z2grading(b)==0
         return a.value * b.value == c.value
     elseif (Z2grading(a)==1 && Z2grading(b)==0)||(Z2grading(b)==1 && Z2grading(a)==0)
@@ -15,8 +29,7 @@ function Nsymbol(a::Irr{𝒞}, b::Irr{𝒞}, c::Irr{𝒞}) where {𝒞<:TY}
     end
 end
 
-function Fsymbol(a::Irr{𝒞}, b::Irr{𝒞}, c::Irr{𝒞}, d::Irr{𝒞}, e::Irr{𝒞}, f::Irr{𝒞}) where {𝒞<:TY}
-    A, χ, ϵ = 𝒞.parameters
+function Fsymbol(a::TYIrr{A,χ,ϵ}, b::TYIrr{A,χ,ϵ}, c::TYIrr{A,χ,ϵ}, d::TYIrr{A,χ,ϵ}, e::TYIrr{A,χ,ϵ}, f::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ}
     is_match = Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d)
     if Z2grading(a)==Z2grading(c)==0&&Z2grading(b)==1
         return χ(a.value, b.value)*is_match
@@ -29,35 +42,34 @@ function Fsymbol(a::Irr{𝒞}, b::Irr{𝒞}, c::Irr{𝒞}, d::Irr{𝒞}, e::Irr{
     end
 end
 
-function Base.one(::Type{Irr{𝒞}}) where {𝒞<:TY}
-    A = 𝒞.parameters[1]
-    return Irr{𝒞}(identity_element(A))
+function Base.one(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}
+    return TYIrr{A,χ,ϵ}(identity_element(A))
 end
 
-Base.conj(c::Irr{𝒞}) where {𝒞<:TY} = Z2grading(c)==0 ? Irr{𝒞}(inverse(c.value)) : c
-function ⊗(c1::Irr{𝒞}, c2::Irr{𝒞}) where {𝒞<:TY}
+Base.conj(c::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ} = Z2grading(c)==0 ? TYIrr{A,χ,ϵ}(inverse(c.value)) : c
+function ⊗(c1::TYIrr{A,χ,ϵ}, c2::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ}
     if Z2grading(c1) == Z2grading(c2) == 0
-        return (Irr{𝒞}(c1.value * c2.value),)
+        return (TYIrr{A,χ,ϵ}(c1.value * c2.value),)
     elseif (Z2grading(c1) == 0 && Z2grading(c2) == 1)||(Z2grading(c1) == 1 && Z2grading(c2) == 0)
-        return (Irr{𝒞}(:σ),)
+        return (TYIrr{A,χ,ϵ}(:σ),)
     elseif Z2grading(c1) == Z2grading(c2) == 1
-        return elements(𝒞.parameters[1])
+        groupeles = elements(TYIrr{A,χ,ϵ}.parameters[1])
+        return map(x->TYIrr{A,χ,ϵ}(x), groupeles)
     end
 end
 
-Base.IteratorSize(::Type{SectorValues{Irr{𝒞}}}) where {𝒞<:TY} = HasLength()
-Base.length(::SectorValues{Irr{𝒞}}) where {𝒞<:TY} = rank(𝒞)
+Base.IteratorSize(::Type{SectorValues{TYIrr{A,χ,ϵ}}}) where {A<:Group,χ,ϵ} = HasLength()
+Base.length(::SectorValues{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ} = rank(TYIrr{A,χ,ϵ})
 
-function Base.getindex(::SectorValues{Irr{𝒞}}, i::Int) where {𝒞<:TY}
-    A = 𝒞.parameters[1]
+function Base.getindex(::SectorValues{TYIrr{A,χ,ϵ}}, i::Int) where {A<:Group,χ,ϵ}
     if i in 1:order(A)
-        return Irr{𝒞}(𝒞.parameters[1][i])
+        return TYIrr{A,χ,ϵ}(TYIrr{A,χ,ϵ}.parameters[1][i])
     else
-        return Irr{𝒞}(:σ)
+        return TYIrr{A,χ,ϵ}(:σ)
     end
 end
 
-Base.iterate(::SectorValues{Irr{𝒞}}, i::Int=0)  where {𝒞<:TY} = i == rank(𝒞) ? nothing : (Irr{𝒞}[i], i + 1)
+Base.iterate(::SectorValues{TYIrr{A,χ,ϵ}}, i::Int=1)  where {A<:Group,χ,ϵ} = i > rank(TYIrr{A,χ,ϵ}) ? nothing : (SectorValues{TYIrr{A,χ,ϵ}}()[i], i + 1)
 
-findindex(::SectorValues{Irr{𝒞}}, a::Irr{𝒞})  where {𝒞<:TY} = Z2grading(a)==0 ? findindex(a.value) : rank(𝒞)
-Base.isless(c1::Irr{𝒞}, c2::Irr{𝒞}) where {𝒞<:TY} = isless(findindex(𝒞, c1), findindex(𝒞, c2))
+findindex(::SectorValues{TYIrr{A,χ,ϵ}}, a::TYIrr{A,χ,ϵ})  where {A<:Group,χ,ϵ} = Z2grading(a)==0 ? findindex(a.value) : rank(TYIrr{A,χ,ϵ})
+Base.isless(c1::TYIrr{A,χ,ϵ}, c2::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ} = isless(findindex(SectorValues{TYIrr{A,χ,ϵ}}(), c1), findindex(SectorValues{TYIrr{A,χ,ϵ}}(), c2))

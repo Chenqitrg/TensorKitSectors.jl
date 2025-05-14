@@ -9,6 +9,8 @@ module TensorKitSectors
 export AbelianGroup
 export elements
 export VecGωIrr, TYIrr
+export ℨ
+export QDZ
 export Sector, Group, AbstractIrrep
 export Irrep
 
@@ -61,6 +63,7 @@ include("anyons.jl")    # non-group sectors
 include("group_related_cats/TambaraYamagami.jl")
 include("group_related_cats/pointedfusion.jl")
 include("group_related_cats/display.jl")
+include("drinfeldcenter.jl")
 # precompile
 # ----------
 include("precompile.jl")

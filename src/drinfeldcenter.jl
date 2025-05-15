@@ -1,4 +1,8 @@
 abstract type ℨ{𝒞<:Sector} <: Sector end
+
+"""
+The quantum double of Rep(ℤₙ).
+"""
 struct QDℤ{N} <: ℨ{ZNIrrep{N}}
     charge::Int
     flux::Int
@@ -31,23 +35,16 @@ function Base.isless(c1::QDℤ{N}, c2::QDℤ{N}) where {N}
         return false
     end
 end
-
 function Rsymbol(a::QDℤ{N}, b::QDℤ{N}, c::QDℤ{N}) where {N}
     R = Nsymbol(a, b, c) * exp(2 * pi * im/N * a.flux * b.charge)
     return R
 end
-
 forget_flux(a::QDℤ{N}) where {N} = ZNIrrep{N}(a.charge)
-
 foget_charge(a::QDℤ{N}) where {N} = ZNIrrep{N}(a.flux)
 
-function HalfBraiding_charge(a::QDℤ{N}, V::GradedSpace{ZNIrrep{N}, NTuple{N, Int64}}) where {N}
-    fgt_a = forget_flux(a)
-    W = ZNSpace{N}(fgt_a=>1)
-    Ω = zeros(V⊗W←W⊗V)
-    for tree in fusiontrees(Ω)
-        charge = tree[1].uncoupled[1]
-        Ω[tree] = exp(2 * pi * im/N * fgt_a.n * charge.n)
-    end
-    return Ω
+"""
+The Drinfeld center of Tambara-Yamagami category is given in paper arXiv:0905.3117
+"""
+struct ℨTY{A,χ,ϵ}<:ℨ{TYIrr{A,χ,ϵ}}
+
 end

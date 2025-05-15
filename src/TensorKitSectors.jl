@@ -9,10 +9,9 @@ module TensorKitSectors
 export AbelianGroup
 export elements
 export VecGωIrr, TYIrr
-export ℨ
-export QDZ
 export Sector, Group, AbstractIrrep
 export Irrep
+export forget_flux
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype
@@ -36,6 +35,8 @@ export PlanarTrivial, FibonacciAnyon, IsingAnyon, Semion
 export ⊠, ⊗, ×
 export ℤ, D, ℤ₂, ℤ₃, ℤ₄, D₃, D₄, D₅, U₁, SU, SU₂, CU₁
 export fℤ₂, fU₁, fSU₂
+export ℨ
+export QDℤ
 
 
 # imports

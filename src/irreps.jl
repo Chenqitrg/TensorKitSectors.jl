@@ -92,6 +92,7 @@ const Z2Irrep = ZNIrrep{2}
 const Z3Irrep = ZNIrrep{3}
 const Z4Irrep = ZNIrrep{4}
 
+rank(::Type{ZNIrrep{N}}) where {N} = N
 Base.one(::Type{ZNIrrep{N}}) where {N} = ZNIrrep{N}(0)
 Base.conj(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
 ⊗(c1::ZNIrrep{N}, c2::ZNIrrep{N}) where {N} = (ZNIrrep{N}(c1.n + c2.n),)

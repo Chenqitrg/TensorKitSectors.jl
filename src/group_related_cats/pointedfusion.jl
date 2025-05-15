@@ -24,7 +24,7 @@ Base.conj(c::VecGωIrr{G, ω}) where {G<:Group, ω} = VecGωIrr{G, ω}(inverse(c
 ⊗(c1::VecGωIrr{G, ω}, c2::VecGωIrr{G, ω}) where {G<:Group, ω} = (VecGωIrr{G, ω}(c1.g*c2.g),)
 
 
-Base.IteratorSize(::Type{SectorValues{VecGωIrr{G, ω}}}) where {G<:Group, ω} = rank(VecGωIrr{G, ω})==Inf ? IsInfinite() : HasLength()
+Base.IteratorSize(::Type{SectorValues{VecGωIrr{G, ω}}}) where {G<:Group, ω} = HasLength()
 Base.length(::SectorValues{VecGωIrr{G, ω}}) where {G<:Group, ω} = rank(VecGωIrr{G, ω})
 Base.getindex(::SectorValues{VecGωIrr{G, ω}}, i::Int) where {G<:Group, ω} = VecGωIrr{G, ω}(G[i])
 

@@ -1,6 +1,3 @@
-
-
-
 function Base.show(io::IO, G::Type{<:ProductGroup})
     T = G.parameters[1]
     groups = T.parameters
@@ -11,11 +8,6 @@ function Base.show(io::IO, G::Type{<:ProductGroup})
         print(io, G)
     end
 end
-
-# function Base.show(io::IO, G::Type{<:CohomologyGroup})
-#     T = G.parameters
-#     print(io, "H", superscript(T[1]), "(", T[2], " , ", T[3], ")")
-# end
 
 function subscript(n::Integer)
     subs = Dict('0' => '₀', '1' => '₁', '2' => '₂', '3' => '₃', '4' => '₄',

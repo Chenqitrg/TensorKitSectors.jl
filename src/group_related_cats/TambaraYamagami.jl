@@ -17,6 +17,8 @@ rank(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ} = order(A) + 1
 
 FusionStyle(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = SimpleFusion()
 BraidingStyle(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = NoBraiding()
+is_modular(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = false
+
 function Nsymbol(a::TYIrr{A,χ,ϵ}, b::TYIrr{A,χ,ϵ}, c::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ}
     if Z2grading(a)==Z2grading(b)==0
         return a.value * b.value == c.value

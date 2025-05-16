@@ -1,6 +1,11 @@
 abstract type ℨ{𝒞<:Sector} <: Sector end
 
 """
+    struct QDℤ{N} <: ℨ{ZNIrrep{N}}
+        charge::Int
+        flux::Int
+    end
+    
 The quantum double of Rep(ℤₙ).
 """
 struct QDℤ{N} <: ℨ{ZNIrrep{N}}
@@ -10,8 +15,13 @@ struct QDℤ{N} <: ℨ{ZNIrrep{N}}
         new{N}(mod(e,N), mod(m, N))
     end
 end
+
+take_center(::Type{ZNIrrep{N}}) where {N} = QDℤ{N}
+
 FusionStyle(::Type{QDℤ{N}}) where {N}  = SimpleFusion()
 BraidingStyle(::Type{QDℤ{N}}) where {N}  = Anyonic()
+is_modular(::Type{QDℤ{N}}) where {N} = true
+
 Nsymbol(a::QDℤ{N}, b::QDℤ{N}, c::QDℤ{N}) where {N} = (mod(a.charge+b.charge, N)==c.charge) && (mod(a.flux+b.flux, N)==c.flux)
 Fsymbol(a::QDℤ{N}, b::QDℤ{N}, c::QDℤ{N}, d::QDℤ{N}, e::QDℤ{N}, f::QDℤ{N}) where {N} = Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d)
 Base.one(::Type{QDℤ{N}}) where {N} = QDℤ{N}(0,0)
@@ -43,8 +53,57 @@ forget_flux(a::QDℤ{N}) where {N} = ZNIrrep{N}(a.charge)
 foget_charge(a::QDℤ{N}) where {N} = ZNIrrep{N}(a.flux)
 
 """
-The Drinfeld center of Tambara-Yamagami category is given in paper arXiv:0905.3117
+    struct QDAb{A} <: ℨ{VecGIrr{A}}
+        a::A
+        f::χ{A}
+    end
+
+The quantum double of Vec_A, where A is an Abelian group.
+
+Its simple objects are elements in A and elements in A*.
+
+"""
+struct QDAb{A} <: ℨ{VecGIrr{A}}
+    a::A
+    f::χ{A}
+    function QDAb{A}(a::A, f::χ{A}) where {A<:Group}
+        if !is_abelian(A)
+            throw(ArgumentError("The group $A is not Abelian"))
+        end
+        new{A}(a,f)
+    end
+end
+
+take_center(::Type{VecGIrr{A}}) where {A<:Group} = QDAb{A}
+
+FusionStyle(::Type{QDAb{A}}) where {A<:Group}  = SimpleFusion()
+BraidingStyle(::Type{QDAb{A}}) where {A<:Group}  = Anyonic()
+is_modular(::Type{QDAb{A}}) where {A<:Group}  = true
+
+function Nsymbol(a::QDAb{A}, b::QDAb{A}, c::QDAb{A}) where {A<:Group}
+    if a.a*b.a != c.a
+        return false
+    elseif a.f * b.f != c.f
+        return false
+    end
+    return true
+end
+Fsymbol(a::QDAb{A}, b::QDAb{A}, c::QDAb{A}, d::QDAb{A}, e::QDAb{A}, f::QDAb{A}) where {A<:Group} = Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d)
+Base.one(::Type{QDAb{A}}) where {A<:Group} = QDAb{A}(identity_element(A),identity_element(χ{A}))
+Base.conj(c::QDAb{A}) where {A<:Group} = QDAb{A}(inverse(c.a), inverse(c.f))
+⊗(c1::QDAb{A}, c2::QDAb{A}) where {A<:Group} = (QDAb{A}(c1.a*c2.a, c1.f*c2.f),)
+function Rsymbol(a::QDAb{A}, b::QDAb{A}, c::QDAb{A}) where {A<:Group}
+    R = Nsymbol(a, b, c) * eval(a.f, b.a)
+    return R
+end
+
+forget_flux(a::QDAb{A}) where {A<:Group} = VecGIrr{A}(a.a)
+
+
+"""
+The Drinfeld center of Tambara-Yamagami category is given in the paper arXiv:0905.3117
 """
 struct ℨTY{A,χ,ϵ}<:ℨ{TYIrr{A,χ,ϵ}}
 
 end
+

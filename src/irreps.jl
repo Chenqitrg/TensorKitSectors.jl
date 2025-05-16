@@ -50,6 +50,8 @@ end
 
 const AbelianIrrep{G} = AbstractIrrep{G} where {G<:AbelianGroup}
 FusionStyle(::Type{<:AbelianIrrep}) = UniqueFusion()
+is_modular(::Type{<:AbelianIrrep}) = false
+
 Base.isreal(::Type{<:AbelianIrrep}) = true
 
 Nsymbol(a::I, b::I, c::I) where {I<:AbelianIrrep} = c == first(a ⊗ b)

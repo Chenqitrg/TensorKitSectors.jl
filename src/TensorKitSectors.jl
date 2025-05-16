@@ -8,7 +8,7 @@ module TensorKitSectors
 # -------
 export AbelianGroup
 export elements
-export VecGωIrr, TYIrr
+export VecGωIrr, VecGIrr, TYIrr, QDAb
 export Sector, Group, AbstractIrrep
 export Irrep
 export forget_flux
@@ -29,6 +29,8 @@ export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
 export ProductSector
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon, Semion
+
+export is_abelian, is_modular
 
 # unicode exports
 # ---------------

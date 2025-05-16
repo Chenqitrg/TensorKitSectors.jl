@@ -77,6 +77,7 @@ dim(a::FibonacciAnyon) = isone(a) ? one(_goldenratio) : _goldenratio
 FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
 Base.isreal(::Type{FibonacciAnyon}) = false
+is_modular(::Type{FibonacciAnyon}) = true
 
 ⊗(a::FibonacciAnyon, b::FibonacciAnyon) = FibonacciIterator(a, b)
 
@@ -194,6 +195,7 @@ dim(a::IsingAnyon) = a.s == :σ ? sqrt(2) : 1.0
 FusionStyle(::Type{IsingAnyon}) = SimpleFusion()
 BraidingStyle(::Type{IsingAnyon}) = Anyonic()
 Base.isreal(::Type{IsingAnyon}) = false
+is_modular(::Type{IsingAnyon}) = true
 
 ⊗(a::IsingAnyon, b::IsingAnyon) = IsingIterator(a, b)
 
@@ -296,18 +298,18 @@ end
 
 
 """
-struct Semion <: Sector
-    isone::Bool
-    function Semion(s::Integer)
-        s in (0, 1) || throw(ArgumentError("Unknown Semion s."))
-        return new(s === 0)
+    struct Semion <: Sector
+        isone::Bool
     end
-end
+
 The semion category is almost Rep(ℤ₂), except that its associator is non-trivial and has non-trivial braiding. 
+
 - The associator is non-trivial only when three fusion anyons are all semions: ω(1,1,1) = -1.
+
 - And the braiding is non-trivial only when two fusion anyons are semions: R(1,1) = i.
-Moreover, it is, perhaps the simplest, non-trivial unitary modular tensor category. It has central charge c = 1.
-It has two simple objects, the trivial one, denoted by 0 and the semion, denoted by 1, which is a non-trivial anyon.
+
+It is, perhaps the simplest, non-trivial unitary modular tensor category. Its central charge c = 1.
+It has two simple objects, the trivial one, denoted by '0' and the semion, denoted by '1'.
 
 Moreover, the Frobenius-Schur indicator is -1 for the semion and +1 for the trivial anyon.
 """
@@ -319,7 +321,7 @@ struct Semion <: Sector
     end
 end
 
-Base.IteratorSize(::Type{SectorValues{Semion}}) = Base.HasLength()
+Base.IteratorSize(::Type{SectorValues{Semion}}) = HasLength()
 Base.length(::SectorValues{Semion}) = 2
 function Base.iterate(::SectorValues{Semion}, i=0)
     return i == 0 ? (Semion(0), 1) : (i == 1 ? (Semion(1), 2) : nothing)
@@ -339,17 +341,9 @@ dim(a::Semion) = 1
 FusionStyle(::Type{Semion}) = SimpleFusion()
 BraidingStyle(::Type{Semion}) = Anyonic()
 Base.isreal(::Type{Semion}) = false
+is_modular(::Type{Semion}) = true
 
 ⊗(a::Semion, b::Semion) = (Semion(mod(to_Z2(a) + to_Z2(b),2)),)
-
-
-Base.IteratorSize(::SectorValues{Semion}) = Base.HasLength()
-Base.IteratorEltype(::SectorValues{Semion}) = Base.HasEltype()
-Base.length(::SectorValues{Semion}) = 2
-function Base.iterate(::SectorValues{Semion}, i=0)
-    return i == 2 ? nothing : (Semion(i), i + 1)
-end
-
 
 function to_Z2(s::Semion)
     return s.isone ? 0 : 1

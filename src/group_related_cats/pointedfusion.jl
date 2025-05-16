@@ -13,6 +13,8 @@ rank(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω} = order(G)
 
 FusionStyle(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω}  = SimpleFusion()
 BraidingStyle(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω}  = NoBraiding()
+is_modular(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω}  = false
+
 Nsymbol(a::VecGωIrr{G, ω}, b::VecGωIrr{G, ω}, c::VecGωIrr{G, ω}) where {G<:Group, ω} = (c.g == a.g * b.g)
 function Fsymbol(a::VecGωIrr{G, ω}, b::VecGωIrr{G, ω}, c::VecGωIrr{G, ω}, d::VecGωIrr{G, ω}, e::VecGωIrr{G, ω}, f::VecGωIrr{G, ω}) where {G<:Group, ω}
     return Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d) * ω(a.g, b.g, c.g)
@@ -40,3 +42,6 @@ findindex(::SectorValues{VecGωIrr{G, ω}}, g::VecGωIrr{G, ω})  where {G<:Grou
 Base.isless(c1::VecGωIrr{G, ω}, c2::VecGωIrr{G, ω}) where {G<:Group, ω} = isless(findindex(c1.g), findindex(c2.g))
 
 
+ω_tri(::G, ::G, ::G) where {G<:Group} = 1.
+
+const VecGIrr{G} = VecGωIrr{G, ω_tri}

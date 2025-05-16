@@ -61,7 +61,7 @@ end
 
 Construct the direct product of a (list of) groups.
 """
-function ×(::Vararg{Type{<:Group}}) end
+function ×(::Vararg{Type{<:Group}}) end # Becareful that the LinearAlgebra also exports "×"
 const times = ×
 
 ×(a::Type{<:Group}, b::Type{<:Group}, c::Type{<:Group}...) = ×(×(a, b), c...)
@@ -128,8 +128,6 @@ function elements(::Type{ProductGroup{Gs}}) where {Gs<:GroupTuple}
     return tuple(map(x->ProductGroup{Gs}(x...),cartesian_product)...)
 end
 
-
-# @show GroupElement{ℤ{3}×ℤ{3}}(GroupElement{ℤ₃}(0), GroupElement{ℤ₃}(1))
 # display(elements(ℤ{3}×D{3}))
 
 identity_element(::Type{ℤ{N}}) where {N} = ℤ{N}(0)
@@ -196,6 +194,47 @@ function findindex(g::ProductGroup{Gs}) where {Gs<:GroupTuple}
         weight *= order(G_this)
     end
     return index+1
+end
+
+"""
+    struct χ{A} <: AbelianGroup
+        f
+    end
+
+The dual group of an Abelian group A.
+"""
+struct χ{A} <: AbelianGroup
+    f
+    function Fun{A}(f) where {A<:Group}
+        if !is_abelian(A)
+            throw(ArgumentError("$A is not Abelian"))
+        end
+        for a in elements(A), b in elements(A)
+            if f(a*b) != f(a) * f(b)
+                throw(ArgumentError("$f is not a character"))
+            end
+        end
+        new{A}(f)
+    end
+end
+
+identity_element(::Type{χ{A}}) where {A<:Group} = χ{A}(x::A -> 1.)
+inverse(f::χ{A}) where {A<:Group} = χ{A}(x::A -> inv(f.f(x)))
+function Base.:*(a::χ{A}, b::χ{A}) where {A<:Group}
+    fab(g::A) = a.f(g) * b.f(g)
+    return χ{A}(fab)
+end
+
+eval(f::χ{A}, a::A) where {A<:Group} = f.f(a)
+
+import Base: ==
+function ==(f::χ{A}, g::χ{A}) where {A<:Group} 
+    for a in elements(A)
+        if f.f(a) != g.f(a)
+            return false
+        end
+    end
+    return true
 end
 
 # Examples

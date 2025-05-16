@@ -76,7 +76,7 @@ function Base.show(io::IO, x::ProductGroup{Gs}) where {Gs<:GroupTuple}
 end
 
 function Base.show(io::IO, x::VecGωIrr{G,ω}) where {G<:Group,ω}
-    print(io, x.g)  
+    print(io, "ℂ(",x.g,")")  
 end
 
 function Base.show(io::IO, x::TYIrr{A,χ,ϵ}) where {A<:Group, χ,ϵ}

@@ -34,7 +34,7 @@ function Base.getindex(::SectorValues{QDℤ{N}}, i::Int) where {N}
     m = (i-1)%N
     return QDℤ{N}(e, m)
 end
-Base.iterate(::SectorValues{QDℤ{N}}, i::Int=1)  where {N} = i == N^2 ? nothing : (QDℤ{N}((i-1)÷N,(i-1)%N), i + 1)
+Base.iterate(::SectorValues{QDℤ{N}}, i::Int=1)  where {N} = i == N^2+1 ? nothing : (QDℤ{N}((i-1)÷N,(i-1)%N), i + 1)
 findindex(::SectorValues{QDℤ{N}}, a::QDℤ{N})  where {N} = a.charge*N + a.flux + 1
 function Base.isless(c1::QDℤ{N}, c2::QDℤ{N}) where {N}
     if c1.charge < c2.charge
@@ -49,8 +49,7 @@ function Rsymbol(a::QDℤ{N}, b::QDℤ{N}, c::QDℤ{N}) where {N}
     R = Nsymbol(a, b, c) * exp(2 * pi * im/N * a.flux * b.charge)
     return R
 end
-forget_flux(a::QDℤ{N}) where {N} = ZNIrrep{N}(a.charge)
-foget_charge(a::QDℤ{N}) where {N} = ZNIrrep{N}(a.flux)
+
 
 """
     struct QDAb{A} <: ℨ{VecGIrr{A}}

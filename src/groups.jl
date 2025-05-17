@@ -205,7 +205,7 @@ The dual group of an Abelian group A.
 """
 struct χ{A} <: AbelianGroup
     f
-    function Fun{A}(f) where {A<:Group}
+    function χ{A}(f) where {A<:Group}
         if !is_abelian(A)
             throw(ArgumentError("$A is not Abelian"))
         end

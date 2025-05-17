@@ -11,7 +11,7 @@ export elements
 export VecGωIrr, VecGIrr, TYIrr, QDAb
 export Sector, Group, AbstractIrrep
 export Irrep
-export forget_flux
+export take_center
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype
@@ -35,7 +35,7 @@ export is_abelian, is_modular
 # unicode exports
 # ---------------
 export ⊠, ⊗, ×
-export ℤ, D, ℤ₂, ℤ₃, ℤ₄, D₃, D₄, D₅, U₁, SU, SU₂, CU₁
+export ℤ, D, ℤ₂, ℤ₃, ℤ₄, D₃, D₄, D₅, U₁, SU, SU₂, CU₁, χ
 export fℤ₂, fU₁, fSU₂
 export ℨ
 export QDℤ

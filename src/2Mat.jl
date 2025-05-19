@@ -25,3 +25,6 @@ Base.conj(c::𝔐at{N}) where {N} = 𝔐at{N}(c.c, c.r)
 Base.IteratorSize(::Type{SectorValues{𝔐at{N}}}) where {N} = HasLength()
 Base.length(::SectorValues{𝔐at{N}}) where {N} = N^2
 Base.getindex(::SectorValues{𝔐at{N}}, i::Int) where {N} = 𝔐at{N}((i-1)÷N+1, (i-1)%N+1)
+Base.iterate(::SectorValues{𝔐at{N}}, i::Int=1)  where {N} = i == N^2 ? nothing : (𝔐at{N}((i-1)÷N+1, (i-1)%N+1), i + 1)
+findindex(::SectorValues{𝔐at{N}}, m::𝔐at{N})  where {N} = (m.r-1)*N + m.c
+Base.isless(c1::𝔐at{N}, c2::𝔐at{N}) where {N} = isless(findindex(c1), findindex(c2))

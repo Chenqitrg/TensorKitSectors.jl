@@ -40,6 +40,7 @@ export ℤ, D, ℤ₂, ℤ₃, ℤ₄, D₃, D₄, D₅, U₁, SU, SU₂, CU₁,
 export fℤ₂, fU₁, fSU₂
 export ℨ
 export QDℤ
+export 𝔐at
 
 
 # imports
@@ -69,6 +70,7 @@ include("group_related_cats/pointedfusion.jl")
 include("group_related_cats/display.jl")
 include("braidedsectors.jl")
 include("drinfeldcenter.jl")
+include("2Mat.jl")
 
 # precompile
 # ----------

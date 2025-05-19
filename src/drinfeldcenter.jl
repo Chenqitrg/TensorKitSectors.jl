@@ -17,7 +17,7 @@ struct QDℤ{N} <: ℨ{ZNIrrep{N}}
 end
 
 take_center(::Type{ZNIrrep{N}}) where {N} = QDℤ{N}
-sector_rank(::Type{ZNIrrep{N}}) where {N} = N^2
+sector_rank(::Type{QDℤ{N}}) where {N} = N^2
 
 FusionStyle(::Type{QDℤ{N}}) where {N}  = SimpleFusion()
 BraidingStyle(::Type{QDℤ{N}}) where {N}  = Anyonic()

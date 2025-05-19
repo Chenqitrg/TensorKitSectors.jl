@@ -1,4 +1,4 @@
-struct 𝔐at{N} <: Sector
+struct 𝔐at{N} <: FusionSector
     r::Int
     c::Int
     function 𝔐at{N}(r::Int, c::Int) where {N}
@@ -12,7 +12,7 @@ struct 𝔐at{N} <: Sector
     end
 end
 
-rank(::Type{𝔐at{N}}) where {N} = N^2
+sector_rank(::Type{𝔐at{N}}) where {N} = N^2
 
 FusionStyle(::Type{𝔐at{N}}) where {N}  = SimpleFusion()
 BraidingStyle(::Type{𝔐at{N}}) where {N} = NoBraiding()

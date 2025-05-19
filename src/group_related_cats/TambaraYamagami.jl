@@ -1,4 +1,4 @@
-struct TYIrr{A<:Group, χ, ϵ} <: Sector
+struct TYIrr{A<:Group, χ, ϵ} <: FusionSector
     value::Any
     function TYIrr{A, χ, ϵ}(obj::Any) where{A<:Group, χ, ϵ}
         if !is_abelian(A)
@@ -13,7 +13,7 @@ struct TYIrr{A<:Group, χ, ϵ} <: Sector
 end
 
 Z2grading(a::TYIrr{A,χ,ϵ}) where {A<:Group,χ,ϵ} = a == TYIrr{A,χ,ϵ}(:σ) ? 1 : 0
-rank(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ} = order(A) + 1
+sector_rank(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ} = order(A) + 1
 
 FusionStyle(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = SimpleFusion()
 BraidingStyle(::Type{TYIrr{A,χ,ϵ}}) where {A<:Group,χ,ϵ}  = NoBraiding()

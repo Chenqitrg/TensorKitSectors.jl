@@ -43,7 +43,7 @@ corresponding to the trivial sector `FibonacciAnyon(:I)` and the non-trivial sec
 - `isone::Bool`: indicates whether the sector corresponds the to trivial anyon `:I`
   (`true`), or the non-trivial anyon `:τ` (`false`).
 """
-struct FibonacciAnyon <: Sector
+struct FibonacciAnyon <: ModularSector
     isone::Bool
     function FibonacciAnyon(s::Symbol)
         s in (:I, :τ, :tau) || throw(ArgumentError("Unknown FibonacciAnyon $s."))
@@ -51,6 +51,7 @@ struct FibonacciAnyon <: Sector
     end
 end
 
+sector_rank(::Type{FibonacciAnyon}) = 2
 Base.IteratorSize(::Type{SectorValues{FibonacciAnyon}}) = HasLength()
 Base.length(::SectorValues{FibonacciAnyon}) = 2
 function Base.iterate(::SectorValues{FibonacciAnyon}, i=0)
@@ -161,7 +162,7 @@ corresponding to the trivial sector `IsingAnyon(:I)` and the non-trivial sectors
 ## Fields
 - `s::Symbol`: the label of the represented anyon, which can be `:I`, `:σ`, or `:ψ`.
 """
-struct IsingAnyon <: Sector
+struct IsingAnyon <: ModularSector
     s::Symbol
     function IsingAnyon(s::Symbol)
         s == :sigma && (s = :σ)
@@ -172,6 +173,8 @@ struct IsingAnyon <: Sector
         return new(s)
     end
 end
+
+sector_rank(::Type{IsingAnyon}) = 3
 
 const all_isinganyons = (IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ))
 
@@ -313,7 +316,7 @@ It has two simple objects, the trivial one, denoted by '0' and the semion, denot
 
 Moreover, the Frobenius-Schur indicator is -1 for the semion and +1 for the trivial anyon.
 """
-struct Semion <: Sector
+struct Semion <: ModularSector
     isone::Bool
     function Semion(s::Integer)
         s in (0, 1) || throw(ArgumentError("Unknown Semion $s."))
@@ -321,6 +324,7 @@ struct Semion <: Sector
     end
 end
 
+sector_rank(::Type{Semion}) = 2
 Base.IteratorSize(::Type{SectorValues{Semion}}) = HasLength()
 Base.length(::SectorValues{Semion}) = 2
 function Base.iterate(::SectorValues{Semion}, i=0)
@@ -362,8 +366,8 @@ function Fsymbol(a::Semion, b::Semion, c::Semion,
 end
 
 function Rsymbol(a::Semion, b::Semion, c::Semion)
-    if isone(a) && isone(b)
-        return Complex(im* Nsymbol(a, b, c))
+    if !isone(a) && !isone(b)
+        return Complex(im*Nsymbol(a, b, c))
     else
         return Complex(Nsymbol(a, b, c))
     end

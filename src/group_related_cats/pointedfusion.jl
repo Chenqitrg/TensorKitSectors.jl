@@ -1,4 +1,4 @@
-struct VecGωIrr{G<:Group, ω} <: Sector
+struct VecGωIrr{G<:Group, ω} <: FusionSector
     g::G
     function VecGωIrr{G, ω}(g) where {G<:Group, ω}
         if g isa G
@@ -9,7 +9,7 @@ struct VecGωIrr{G<:Group, ω} <: Sector
     end
 end
 
-rank(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω} = order(G)
+sector_rank(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω} = order(G)
 
 FusionStyle(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω}  = SimpleFusion()
 BraidingStyle(::Type{VecGωIrr{G, ω}}) where {G<:Group, ω}  = NoBraiding()
@@ -25,20 +25,11 @@ end
 Base.conj(c::VecGωIrr{G, ω}) where {G<:Group, ω} = VecGωIrr{G, ω}(inverse(c.g))
 ⊗(c1::VecGωIrr{G, ω}, c2::VecGωIrr{G, ω}) where {G<:Group, ω} = (VecGωIrr{G, ω}(c1.g*c2.g),)
 
-
 Base.IteratorSize(::Type{SectorValues{VecGωIrr{G, ω}}}) where {G<:Group, ω} = HasLength()
-Base.length(::SectorValues{VecGωIrr{G, ω}}) where {G<:Group, ω} = rank(VecGωIrr{G, ω})
+Base.length(::SectorValues{VecGωIrr{G, ω}}) where {G<:Group, ω} = order(G)
 Base.getindex(::SectorValues{VecGωIrr{G, ω}}, i::Int) where {G<:Group, ω} = VecGωIrr{G, ω}(G[i])
-
-function Base.iterate(::SectorValues{VecGωIrr{G, ω}}, i::Int=0)  where {G<:Group, ω}
-    if rank(VecGωIrr{G, ω})==Inf
-        return i <= 0 ? (VecGωIrr{G, ω}(G[i]), (-i + 1)) : (VecGωIrr{G, ω}(G[i]), -i)
-    else
-        return i == rank(VecGωIrr{G, ω})-1 ? nothing : (VecGωIrr{G, ω}(G[i+1]), i + 1)
-    end
-end
+Base.iterate(::SectorValues{VecGωIrr{G, ω}}, i::Int=0)  where {G<:Group, ω} = i == rank(VecGωIrr{G, ω})-1 ? nothing : (VecGωIrr{G, ω}(G[i+1]), i + 1)
 findindex(::SectorValues{VecGωIrr{G, ω}}, g::VecGωIrr{G, ω})  where {G<:Group, ω} = findindex(g.g)
-
 Base.isless(c1::VecGωIrr{G, ω}, c2::VecGωIrr{G, ω}) where {G<:Group, ω} = isless(findindex(c1.g), findindex(c2.g))
 
 

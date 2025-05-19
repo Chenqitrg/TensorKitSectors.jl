@@ -1,4 +1,4 @@
-abstract type ℨ{𝒞<:Sector} <: Sector end
+abstract type ℨ{𝒞<:Sector} <: ModularSector end
 
 """
     struct QDℤ{N} <: ℨ{ZNIrrep{N}}
@@ -6,7 +6,7 @@ abstract type ℨ{𝒞<:Sector} <: Sector end
         flux::Int
     end
     
-The quantum double of Rep(ℤₙ).
+The quantum double of Rep(ℤₙ) or Vec(ℤₙ).
 """
 struct QDℤ{N} <: ℨ{ZNIrrep{N}}
     charge::Int
@@ -17,6 +17,7 @@ struct QDℤ{N} <: ℨ{ZNIrrep{N}}
 end
 
 take_center(::Type{ZNIrrep{N}}) where {N} = QDℤ{N}
+sector_rank(::Type{ZNIrrep{N}}) where {N} = N^2
 
 FusionStyle(::Type{QDℤ{N}}) where {N}  = SimpleFusion()
 BraidingStyle(::Type{QDℤ{N}}) where {N}  = Anyonic()
@@ -96,6 +97,8 @@ function Rsymbol(a::QDAb{A}, b::QDAb{A}, c::QDAb{A}) where {A<:Group}
     return R
 end
 
+# TO DO: choose a basis for character such that the iterator can be defined
+
 forget_flux(a::QDAb{A}) where {A<:Group} = VecGIrr{A}(a.a)
 
 
@@ -106,3 +109,4 @@ struct ℨTY{A,χ,ϵ}<:ℨ{TYIrr{A,χ,ϵ}}
 
 end
 
+take_center(::Type{𝒞}) where {𝒞<:ModularSector} = 𝒞 ⊠ TimeReversed{𝒞}

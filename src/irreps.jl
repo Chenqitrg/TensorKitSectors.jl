@@ -15,7 +15,7 @@ the group name followed by `Irrep`.
 
 All irreps have [`BraidingStyle`](@ref) equal to `Bosonic()` and thus trivial twists.
 """
-abstract type AbstractIrrep{G<:Group} <: Sector end # irreps have integer quantum dimensions
+abstract type AbstractIrrep{G<:Group} <: SymmetricSector end # irreps have integer quantum dimensions
 BraidingStyle(::Type{<:AbstractIrrep}) = Bosonic()
 
 struct IrrepTable end
@@ -47,6 +47,8 @@ function Base.show(io::IO, c::AbstractIrrep)
         fieldcount(I) > 1 && print(io, ")")
     end
 end
+
+sector_rank(::Type{<:AbstractIrrep{G}}) where {G<:Group} = order(G)
 
 const AbelianIrrep{G} = AbstractIrrep{G} where {G<:AbelianGroup}
 FusionStyle(::Type{<:AbelianIrrep}) = UniqueFusion()
@@ -94,7 +96,7 @@ const Z2Irrep = ZNIrrep{2}
 const Z3Irrep = ZNIrrep{3}
 const Z4Irrep = ZNIrrep{4}
 
-rank(::Type{ZNIrrep{N}}) where {N} = N
+sector_rank(::Type{ZNIrrep{N}}) where {N} = N
 Base.one(::Type{ZNIrrep{N}}) where {N} = ZNIrrep{N}(0)
 Base.conj(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
 ⊗(c1::ZNIrrep{N}, c2::ZNIrrep{N}) where {N} = (ZNIrrep{N}(c1.n + c2.n),)

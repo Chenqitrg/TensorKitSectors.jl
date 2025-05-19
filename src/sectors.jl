@@ -31,6 +31,11 @@ Furthermore, `iterate` and `Base.IteratorSize` should be made to work for the si
 """
 abstract type Sector end
 
+abstract type FusionSector <: Sector end
+abstract type BraidedSector <: FusionSector end
+abstract type SymmetricSector <: BraidedSector end
+abstract type ModularSector <: BraidedSector end
+
 # iterator over the values (i.e., elements of representative set of simple objects)
 # in the sector
 """

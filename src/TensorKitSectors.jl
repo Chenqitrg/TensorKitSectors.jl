@@ -6,17 +6,18 @@ module TensorKitSectors
 
 # exports
 # -------
+export FusionSector, BraidedSector, SymmetricSector, ModularSector
 export AbelianGroup
-export elements
-export VecGωIrr, VecGIrr, TYIrr, QDAb
+export elements, order
+export VecGωIrr, VecGIrr, TYIrr, QDAb, ModularDouble
 export Sector, Group, AbstractIrrep
 export Irrep
 export take_center
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype
-export dim, sqrtdim, invsqrtdim, frobeniusschur, twist, fusiontensor, dual
-export otimes, deligneproduct, times
+export dim, sqrtdim, invsqrtdim, frobeniusschur, twist, fusiontensor, dual, sector_rank, S_matrix, T_vector
+export otimes, deligneproduct, times, TimeReversed
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
        MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
@@ -66,7 +67,9 @@ include("anyons.jl")    # non-group sectors
 include("group_related_cats/TambaraYamagami.jl")
 include("group_related_cats/pointedfusion.jl")
 include("group_related_cats/display.jl")
+include("braidedsectors.jl")
 include("drinfeldcenter.jl")
+
 # precompile
 # ----------
 include("precompile.jl")

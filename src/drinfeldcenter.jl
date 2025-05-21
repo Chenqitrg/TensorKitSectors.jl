@@ -110,3 +110,5 @@ struct ℨTY{A,χ,ϵ}<:ℨ{TYIrr{A,χ,ϵ}}
 end
 
 take_center(::Type{𝒞}) where {𝒞<:ModularSector} = 𝒞 ⊠ TimeReversed{𝒞}
+
+take_center(::Type{𝒮}) where {𝒮<:ProductSector} = ⊠(map(x->take_center(x), 𝒮.parameters[1].parameters)...)

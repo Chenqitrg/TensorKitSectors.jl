@@ -382,4 +382,110 @@ end
 Base.hash(a::Semion, h::UInt) = hash(a.isone, h)
 Base.isless(a::Semion, b::Semion) = isless(!a.isone, !b.isone)
 
+struct YangLee <: Sector
+    isone::Bool
+    function YangLee(s::Symbol)
+        s in (:I, :τ, :tau) || throw(ArgumentError("Unknown YangLee $s."))
+        return new(s === :I)
+    end
+end
+
+Base.IteratorSize(::Type{SectorValues{YangLee}}) = Base.HasLength()
+Base.length(::SectorValues{YangLee}) = 2
+function Base.iterate(::SectorValues{YangLee}, i=0)
+    return i == 0 ? (YangLee(:I), 1) : (i == 1 ? (YangLee(:τ), 2) : nothing)
+end
+function Base.getindex(S::SectorValues{YangLee}, i::Int)
+    if i == 1
+        return YangLee(:I)
+    elseif i == 2
+        return YangLee(:τ)
+    else
+        throw(BoundsError(S, i))
+    end
+end
+findindex(::SectorValues{YangLee}, s::YangLee) = 2 - s.isone
+
+Base.convert(::Type{YangLee}, s::Symbol) = YangLee(s)
+Base.one(::Type{YangLee}) = YangLee(:I)
+Base.conj(s::YangLee) = s
+
+
+dim(a::YangLee) = isone(a) ? one(_goldenratio) : _goldenratio
+
+FusionStyle(::Type{YangLee}) = SimpleFusion()
+BraidingStyle(::Type{YangLee}) = NoBraiding()
+Base.isreal(::Type{YangLee}) = false
+
+TensorKitSectors.:⊗(a::YangLee, b::YangLee) = YangLeeIterator(a, b)
+
+struct YangLeeIterator
+    a::YangLee
+    b::YangLee
+end
+Base.IteratorSize(::Type{YangLeeIterator}) = Base.HasLength()
+Base.IteratorEltype(::Type{YangLeeIterator}) = Base.HasEltype()
+Base.length(iter::YangLeeIterator) = (isone(iter.a) || isone(iter.b)) ? 1 : 2
+Base.eltype(::Type{YangLeeIterator}) = YangLee
+function Base.iterate(iter::YangLeeIterator, state=1)
+    I = YangLee(:I)
+    τ = YangLee(:τ)
+    if state == 1 # first iteration
+        iter.a == I && return (iter.b, 2)
+        iter.b == I && return (iter.a, 2)
+        return (I, 2)
+    elseif state == 2
+        (iter.a == iter.b == τ) && return (τ, 3)
+        return nothing
+    else
+        return nothing
+    end
+end
+
+function Nsymbol(a::YangLee, b::YangLee, c::YangLee)
+    return isone(a) + isone(b) + isone(c) != 2
+end # zero if one tau and two ones
+
+function Fsymbol(a::YangLee, b::YangLee, c::YangLee,
+                 d::YangLee, e::YangLee, f::YangLee)
+    Nsymbol(a, b, e) || return zero(_goldenratio)
+    Nsymbol(e, c, d) || return zero(_goldenratio)
+    Nsymbol(b, c, f) || return zero(_goldenratio)
+    Nsymbol(a, f, d) || return zero(_goldenratio)
+
+    I = YangLee(:I)
+    τ = YangLee(:τ)
+    if a == b == c == d == τ
+        if e == f == I
+            return - _goldenratio
+        elseif e == f == τ
+            return _goldenratio
+        elseif e == I && f == τ
+            return 2.433420853853658
+        elseif e == τ && f == I
+            return -0.6649215593708395
+        end
+    else
+        return one(_goldenratio)
+    end
+end
+
+function Rsymbol(a::YangLee, b::YangLee, c::YangLee)
+    Nsymbol(a, b, c) || return 0 * cispi(0 / 1)
+    if isone(a) || isone(b)
+        return cispi(0 / 1)
+    else
+        return isone(c) ? cispi(2 / 5) : cispi(1 / 5)
+    end
+end
+
+function Base.show(io::IO, a::YangLee)
+    s = isone(a) ? ":I" : ":τ"
+    return get(io, :typeinfo, nothing) === YangLee ?
+           print(io, s) : print(io, "YangLee(", s, ")")
+end
+
+Base.hash(a::YangLee, h::UInt) = hash(a.isone, h)
+Base.isless(a::YangLee, b::YangLee) = isless(!a.isone, !b.isone)
+
 
